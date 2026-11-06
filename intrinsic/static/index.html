@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Intrinsic turns public company financials into seven independent valuation estimates — DCF, reverse DCF, earnings power, Graham, dividends and relative value.">
+  <meta name="theme-color" content="#f4f3ef">
+  <title>Intrinsic — what is a business really worth?</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23c8f45a'/%3E%3Cpath d='M17 45V19h7v26zm12 0V19h18v7H36v5h9v7h-9v7z' fill='%2308110e'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+  <svg class="svg-sprite" aria-hidden="true">
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4.2-4.2"></path></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"></path></symbol>
+    <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V4h10v5M7 18H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M7 14h10v6H7z"></path></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.2 1.2"></path><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.2-1.2"></path></symbol>
+    <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V21l-6-4-6 4z"></path></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z"></path></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2.5 20h19z"></path><path d="M12 9v4M12 17h.01"></path></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"></path><path d="M20 4v7h-7"></path></symbol>
+  </svg>
+
+  <div class="ambient" aria-hidden="true">
+    <div class="ambient-glow ambient-glow-a"></div>
+    <div class="ambient-glow ambient-glow-b"></div>
+    <div class="ambient-grid"></div>
+  </div>
+
+  <div class="print-header">
+    <strong>INTRINSIC.</strong><span>Valuation snapshot</span>
+  </div>
+
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Intrinsic home">
+      <span class="brand-mark" aria-hidden="true"><span>I</span></span>
+      <span class="brand-word">INTRINSIC<span class="brand-dot">.</span></span>
+    </a>
+    <nav class="topnav" aria-label="Main navigation">
+      <a href="#summarySection">Valuation</a>
+      <a href="#modelsSection">Models</a>
+      <a href="#labSection">DCF lab</a>
+      <a href="#qualitySection">Quality</a>
+    </nav>
+    <div class="top-actions">
+      <div class="status-pill" id="dataStatus" title="Market data status">
+        <span class="status-dot"></span>
+        <span id="dataStatusText">Ready</span>
+      </div>
+      <button class="live-btn" id="liveButton" type="button" role="switch" aria-checked="false" aria-label="Live price refresh" title="Refresh the quote automatically — every 60 seconds while the tab is visible">
+        <span class="live-dot"></span>
+        <span class="live-label">LIVE</span>
+        <span class="live-caption" id="liveCaption">off</span>
+      </button>
+      <button class="icon-btn" id="themeToggle" type="button" aria-label="Switch colour theme" title="Switch theme">
+        <svg class="icon"><use href="#i-sun"></use></svg>
+      </button>
+      <button class="watchlist-btn" id="watchlistButton" type="button" aria-expanded="false" aria-controls="watchlistDrawer">
+        <svg class="icon"><use href="#i-bookmark"></use></svg>
+        <span>Watchlist</span>
+        <span class="watch-count" id="watchCount">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="top">
+      <div class="hero-kicker">
+        <span>Fundamental valuation, decomposed</span>
+      </div>
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <h1>What is a business<br><em>really</em> worth<span class="accent-period">?</span></h1>
+          <p class="hero-sub">One stock. Seven ways to value it. Search any listed company and see the range of reasonable answers — with every assumption in the open.</p>
+        </div>
+      </div>
+
+      <div class="search-zone">
+        <form class="search-box" id="searchForm" role="search" autocomplete="off">
+          <svg class="icon search-icon"><use href="#i-search"></use></svg>
+          <label class="sr-only" for="searchInput">Search a stock by name or ticker</label>
+          <input id="searchInput" name="q" type="text" placeholder="Search a company or ticker — Apple, NVDA, KO…" spellcheck="false" aria-autocomplete="list" aria-controls="suggestions" aria-expanded="false">
+          <kbd class="search-kbd">/</kbd>
+          <button class="search-submit" type="submit">
+            <span>Analyse</span>
+            <svg class="icon"><use href="#i-arrow"></use></svg>
+          </button>
+        </form>
+        <div class="suggestions" id="suggestions" role="listbox" hidden></div>
+        <div class="quick-row">
+          <span class="quick-label">TRY</span>
+          <div class="quick-chips" id="quickChips">
+            <button type="button" data-symbol="AAPL">AAPL</button>
+            <button type="button" data-symbol="MSFT">MSFT</button>
+            <button type="button" data-symbol="NVDA">NVDA</button>
+            <button type="button" data-symbol="KO">KO</button>
+            <button type="button" data-symbol="JPM">JPM</button>
+            <button type="button" data-symbol="TSLA">TSLA</button>
+          </div>
+          <span class="quick-note">Live public-market data · No login</span>
+        </div>
+      </div>
+
+      <div class="hero-proof">
+        <div><strong>7</strong><span>valuation lenses</span></div>
+        <div><strong>4 yrs</strong><span>of statements</span></div>
+        <div><strong>1,800</strong><span>Monte Carlo paths</span></div>
+        <div><strong>0</strong><span>black boxes</span></div>
+      </div>
+    </section>
+
+    <div id="loadingState" class="state-panel" hidden>
+      <div class="skeleton skeleton-head"></div>
+      <div class="skeleton-grid">
+        <div class="skeleton skeleton-card tall"></div>
+        <div class="skeleton skeleton-card tall"></div>
+      </div>
+      <div class="skeleton skeleton-line"></div>
+      <div class="skeleton-grid three">
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+      </div>
+      <p class="loading-copy"><span class="spinner"></span> Pulling statements, market price and analyst data…</p>
+    </div>
+
+    <div id="errorState" class="state-panel error-panel" hidden>
+      <div class="error-mark"><svg class="icon"><use href="#i-alert"></use></svg></div>
+      <div>
+        <p class="mono-label">DATA INTERRUPTED</p>
+        <h2 id="errorTitle">We could not load that company.</h2>
+        <p id="errorMessage" class="muted">Check the ticker and try again.</p>
+        <div class="error-actions">
+          <button class="btn primary" id="retryButton" type="button"><svg class="icon"><use href="#i-refresh"></use></svg> Try again</button>
+          <button class="btn ghost" type="button" data-symbol="AAPL">Load Apple instead</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="results" hidden>
+      <section class="company-head" id="summarySection">
+        <div class="company-identity">
+          <div class="ticker-mark" id="companyMark">A</div>
+          <div class="company-titles">
+            <div class="eyebrow-row">
+              <span class="mono-label" id="companyTicker">AAPL</span>
+              <span class="dot-sep">·</span>
+              <span class="mono-label muted" id="companyExchange">NASDAQ</span>
+              <span class="sector-tag" id="companySector">Technology</span>
+            </div>
+            <h2 id="companyName">Apple Inc.</h2>
+            <p id="companyMeta" class="company-meta">Consumer Electronics</p>
+          </div>
+        </div>
+        <div class="company-quote">
+          <div class="quote-price" id="quotePrice">$0.00</div>
+          <div class="quote-change" id="quoteChange">—</div>
+          <div class="quote-time" id="quoteTime">—</div>
+          <div class="quote-updated" id="quoteUpdated" hidden>updated <span id="quoteUpdatedAgo">now</span></div>
+        </div>
+        <div class="company-actions">
+          <button class="btn ghost small" id="watchToggle" type="button" aria-label="Save to watchlist"><svg class="icon"><use href="#i-bookmark"></use></svg><span>Save</span></button>
+          <button class="btn ghost small" id="shareButton" type="button" aria-label="Copy a shareable link"><svg class="icon"><use href="#i-link"></use></svg><span>Share</span></button>
+          <button class="btn ghost small" id="printButton" type="button" aria-label="Print or save a report"><svg class="icon"><use href="#i-print"></use></svg><span>Report</span></button>
+        </div>
+      </section>
+
+      <div id="dataNotice" class="data-notice" hidden>
+        <svg class="icon"><use href="#i-info"></use></svg>
+        <p><strong id="dataNoticeTitle">Data note</strong> <span id="dataNoticeText"></span></p>
+        <button type="button" class="notice-close" id="dataNoticeClose" aria-label="Dismiss data note"><svg class="icon"><use href="#i-close"></use></svg></button>
+      </div>
+
+      <div id="updatesBanner" class="updates-banner" role="status" hidden>
+        <div class="updates-icon"><svg class="icon"><use href="#i-refresh"></use></svg></div>
+        <div class="updates-copy">
+          <strong id="updatesTitle">Newer financial data is available.</strong>
+          <span id="updatesText"></span>
+        </div>
+        <button type="button" class="btn primary small" id="updatesApply">
+          <svg class="icon"><use href="#i-refresh"></use></svg><span>Update valuation</span>
+        </button>
+        <button type="button" class="notice-close" id="updatesDismiss" aria-label="Dismiss update notice"><svg class="icon"><use href="#i-close"></use></svg></button>
+      </div>
+
+      <section class="summary-grid" aria-labelledby="summaryHeading">
+        <article class="panel value-panel">
+          <div class="panel-top">
+            <div>
+              <p class="mono-label">BLENDED INTRINSIC VALUE</p>
+              <h2 class="sr-only" id="summaryHeading">Blended intrinsic value</h2>
+            </div>
+            <button class="info-btn" type="button" id="blendInfoButton" aria-label="How the blend is calculated"><svg class="icon"><use href="#i-info"></use></svg></button>
+          </div>
+          <div class="value-display">
+            <span class="value-currency" id="summaryCurrency">$</span><span class="value-number" id="summaryValue">—</span>
+          </div>
+          <div class="value-verdict-row">
+            <span class="verdict-pill" id="verdictPill"><span class="verdict-dot"></span><span id="verdictLabel">Calculating</span></span>
+            <span class="confidence-pill" id="confidencePill"><span class="confidence-dot"></span><span id="confidenceLabel">Confidence —</span></span>
+            <span class="upside-copy" id="summaryUpside">—</span>
+          </div>
+          <div class="range-block">
+            <div class="range-track" id="summaryRangeTrack">
+              <div class="range-fill" id="summaryRangeFill"></div>
+              <div class="range-price" id="summaryPriceMarker"><span>PRICE</span></div>
+              <div class="range-value" id="summaryValueMarker"></div>
+            </div>
+            <div class="range-labels">
+              <span>Bear <b id="summaryLow">—</b></span>
+              <span>Base <b id="summaryBase">—</b></span>
+              <span>Bull <b id="summaryHigh">—</b></span>
+            </div>
+          </div>
+          <div class="value-foot">
+            <div>
+              <span class="mini-label">PRICE / BLENDED VALUE</span>
+              <strong id="safetyValue">—</strong>
+            </div>
+            <div>
+              <span class="mini-label">MODELS IN BLEND</span>
+              <strong id="modelCount">—</strong>
+            </div>
+            <div>
+              <span class="mini-label">MARKET CAP</span>
+              <strong id="summaryMarketCap">—</strong>
+            </div>
+          </div>
+          <p class="panel-note" id="blendNote">A weighted blend of independent estimates — not a price target.</p>
+        </article>
+
+        <article class="panel signal-panel">
+          <div class="panel-top">
+            <p class="mono-label">THE MARKET'S VERDICT</p>
+            <span class="live-tag" id="marketStateTag">LIVE</span>
+          </div>
+          <div class="gauge-wrap">
+            <svg class="gauge" viewBox="0 0 220 128" role="img" aria-label="Upside or downside to blended value">
+              <defs>
+                <linearGradient id="gaugeGradient" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#ff7a66"></stop>
+                  <stop offset="50%" stop-color="#f4c76b"></stop>
+                  <stop offset="100%" stop-color="#b9ef66"></stop>
+                </linearGradient>
+              </defs>
+              <path class="gauge-track" d="M 22 112 A 88 88 0 0 1 198 112"></path>
+              <path class="gauge-progress" id="gaugeProgress" d="M 22 112 A 88 88 0 0 1 198 112"></path>
+              <line class="gauge-tick" x1="110" y1="12" x2="110" y2="24"></line>
+            </svg>
+            <div class="gauge-center">
+              <strong id="gaugeUpside">—</strong>
+              <span id="gaugeCaption">to blended value</span>
+            </div>
+          </div>
+          <div class="signal-stats">
+            <div><span>Current price</span><strong id="signalPrice">—</strong></div>
+            <div><span>52-week range</span><strong id="signalWeekRange">—</strong></div>
+            <div><span>P/E · fwd P/E</span><strong id="signalPE">—</strong></div>
+            <div><span>FCF yield</span><strong id="signalFcfYield">—</strong></div>
+          </div>
+          <div class="signal-footer">
+            <div class="sparkline-wrap" id="sparklineWrap">
+              <span class="mini-label">12 MONTHS</span>
+              <div id="sparkline"></div>
+            </div>
+            <div class="analyst-mini">
+              <span class="mini-label">STREET TARGET</span>
+              <strong id="analystMini">—</strong>
+              <span id="analystMiniSub">—</span>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel reverse-panel" aria-labelledby="reverseHeading">
+        <div class="reverse-graphic" aria-hidden="true">
+          <div class="orbit orbit-a"></div>
+          <div class="orbit orbit-b"></div>
+          <div class="reverse-core"><svg class="icon"><use href="#i-refresh"></use></svg></div>
+        </div>
+        <div class="reverse-copy">
+          <p class="mono-label accent">REVERSE DCF · WHAT IS ALREADY PRICED IN?</p>
+          <h2 id="reverseHeading"><span id="reverseHeadingLead">The market expects</span> <span id="reverseGrowth">—</span><span id="reverseHeadingTail"> growth.</span></h2>
+          <p id="reverseText">We solve for the FCF growth rate that makes our DCF equal today's price.</p>
+        </div>
+        <div class="reverse-bars">
+          <div class="reverse-bar-row">
+            <span>Our base case</span>
+            <div class="reverse-track"><span id="reverseBaseBar"></span></div>
+            <b id="reverseBase">—</b>
+          </div>
+          <div class="reverse-bar-row market">
+            <span>Implied by price</span>
+            <div class="reverse-track"><span id="reverseImpliedBar"></span></div>
+            <b id="reverseImplied">—</b>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-block" aria-labelledby="modelsHeading">
+        <div class="section-head">
+          <div>
+            <p class="mono-label">SIX INDEPENDENT LENSES <span class="muted">(+ A SEVENTH WHEN DIVIDENDS MATTER)</span></p>
+            <h2 id="modelsHeading">The same business, valued differently.</h2>
+          </div>
+          <p class="section-sub">Each model sees something different. Read the spread, the assumptions and the caveats — not just the headline number.</p>
+        </div>
+        <div class="model-grid" id="modelsGrid"></div>
+      </section>
+
+      <section class="panel football-panel" aria-labelledby="footballHeading">
+        <div class="panel-head-row">
+          <div>
+            <p class="mono-label">FOOTBALL FIELD</p>
+            <h2 id="footballHeading">The range of reasonable answers.</h2>
+          </div>
+          <div class="legend">
+            <span><i class="legend-dot high"></i>High confidence</span>
+            <span><i class="legend-dot medium"></i>Medium</span>
+            <span><i class="legend-dot low"></i>Low</span>
+            <span><i class="legend-line"></i>Market price</span>
+          </div>
+        </div>
+        <div class="football-chart" id="footballChart"></div>
+        <p class="panel-note">Bars show each model's bear-to-bull range. Dots mark the base case. A model with no dot is excluded from the blend. The market price is today's quote.</p>
+      </section>
+
+      <section class="panel peer-panel" id="peerSection" aria-labelledby="peerHeading" hidden>
+        <div class="panel-head-row">
+          <div>
+            <p class="mono-label">LIVE PEER GROUP</p>
+            <h2 id="peerHeading">Who the market is comparing it to.</h2>
+          </div>
+          <span class="runs-tag" id="peerStatus">Building peer set…</span>
+        </div>
+        <p class="panel-intro" id="peerIntro">Live sector peers, median multiples and the subject company in one place. This is the peer set behind the P/E, EV/EBITDA and P/B lenses.</p>
+        <div class="peer-summary" id="peerSummary"></div>
+        <div class="peer-table-scroll">
+          <table class="peer-table">
+            <thead>
+              <tr>
+                <th>Company</th>
+                <th>Market cap</th>
+                <th>P/E</th>
+                <th>EV / EBITDA</th>
+                <th>P/B</th>
+              </tr>
+            </thead>
+            <tbody id="peerRows"></tbody>
+            <tfoot id="peerMedianRow"></tfoot>
+          </table>
+        </div>
+        <p class="panel-note" id="peerNote"></p>
+      </section>
+
+      <section class="section-block" id="labSection" aria-labelledby="labHeading">
+        <div class="section-head">
+          <div>
+            <p class="mono-label">INTERACTIVE DCF</p>
+            <h2 id="labHeading">Change the story. Watch the value move.</h2>
+          </div>
+          <p class="section-sub">Four assumptions drive most of a DCF. Move them and see what the market is implicitly believing.</p>
+        </div>
+        <div class="panel lab-panel">
+          <div class="lab-grid">
+            <div class="assumption-panel">
+              <div class="assumption-head">
+                <span class="mono-label">ASSUMPTIONS</span>
+                <button class="text-btn" id="resetAssumptions" type="button"><svg class="icon"><use href="#i-refresh"></use></svg> Reset</button>
+              </div>
+
+              <div class="slider-field" data-field="growth">
+                <div class="slider-label">
+                  <label for="growthSlider">Starting FCF growth</label>
+                  <output id="growthOutput">—</output>
+                </div>
+                <input id="growthSlider" type="range" min="-10" max="30" step="0.5" value="8">
+                <div class="slider-scale"><span>−10%</span><span>30%</span></div>
+                <p class="field-hint">Fades linearly to terminal growth over the horizon.</p>
+              </div>
+
+              <div class="slider-field" data-field="margin">
+                <div class="slider-label">
+                  <label for="marginSlider">Free cash flow margin</label>
+                  <output id="marginOutput">—</output>
+                </div>
+                <input id="marginSlider" type="range" min="-10" max="60" step="0.5" value="20">
+                <div class="slider-scale"><span>−10%</span><span>60%</span></div>
+                <p class="field-hint">FCF after capex and stock-based compensation.</p>
+              </div>
+
+              <div class="slider-field" data-field="wacc">
+                <div class="slider-label">
+                  <label for="waccSlider">Discount rate (WACC)</label>
+                  <output id="waccOutput">—</output>
+                </div>
+                <input id="waccSlider" type="range" min="6" max="16" step="0.1" value="9">
+                <div class="slider-scale"><span>6%</span><span>16%</span></div>
+                <p class="field-hint">The return an investor demands for the risk taken.</p>
+              </div>
+
+              <div class="slider-field" data-field="terminal">
+                <div class="slider-label">
+                  <label for="terminalSlider">Terminal growth</label>
+                  <output id="terminalOutput">—</output>
+                </div>
+                <input id="terminalSlider" type="range" min="0" max="5" step="0.1" value="2.5">
+                <div class="slider-scale"><span>0%</span><span>5%</span></div>
+                <p class="field-hint">Perpetual growth after the forecast. Rarely above nominal GDP.</p>
+              </div>
+
+              <div class="horizon-field">
+                <span class="slider-label">Growth horizon</span>
+                <div class="segmented" id="horizonControl" role="group" aria-label="DCF growth horizon">
+                  <button type="button" data-years="5">5y</button>
+                  <button type="button" data-years="10">10y</button>
+                  <button type="button" data-years="15">15y</button>
+                </div>
+              </div>
+
+              <label class="toggle-field" for="sbcToggle">
+                <span class="toggle-copy">
+                  <strong>Deduct stock-based compensation</strong>
+                  <small>Treats SBC as a real cost to owners.</small>
+                </span>
+                <input id="sbcToggle" type="checkbox" checked>
+                <span class="toggle-track" aria-hidden="true"><span></span></span>
+              </label>
+            </div>
+
+            <div class="lab-output">
+              <div class="lab-output-head">
+                <div>
+                  <p class="mono-label">DCF VALUE PER SHARE</p>
+                  <div class="lab-value" id="labValue">—</div>
+                  <div class="lab-delta" id="labDelta">—</div>
+                </div>
+                <div class="lab-metrics">
+                  <div><span>Enterprise value</span><b id="labEv">—</b></div>
+                  <div><span>Equity value</span><b id="labEquity">—</b></div>
+                  <div><span>Terminal value share</span><b id="labTerminalShare">—</b></div>
+                  <div><span>Starting FCF</span><b id="labStartFcf">—</b></div>
+                </div>
+              </div>
+              <div class="projection-chart" id="projectionChart"></div>
+              <div class="print-assumptions" id="printAssumptions"></div>
+              <div class="chart-legend">
+                <span><i class="chart-swatch nominal"></i>Nominal FCF</span>
+                <span><i class="chart-swatch pv"></i>Present value</span>
+                <span><i class="chart-swatch terminal"></i>Terminal value share</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sensitivity-block">
+            <div class="sensitivity-head">
+              <div>
+                <p class="mono-label">SENSITIVITY</p>
+                <h3>What if the discount rate is wrong?</h3>
+              </div>
+              <p>Shading shows each case versus our base DCF. The small percentage is upside or downside to today's price.</p>
+            </div>
+            <div class="table-scroll">
+              <div class="sensitivity-table" id="sensitivityTable"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="split-grid">
+        <article class="panel monte-panel" aria-labelledby="monteHeading">
+          <div class="panel-head-row">
+            <div>
+              <p class="mono-label">MONTE CARLO</p>
+              <h2 id="monteHeading">If we are wrong, how wrong?</h2>
+            </div>
+            <span class="runs-tag" id="runsTag">1,800 paths</span>
+          </div>
+          <p class="panel-intro">We randomly vary growth, margin, discount rate and terminal growth around the base case. This is a distribution of DCF outcomes, not a probability of future returns.</p>
+          <div class="monte-chart" id="monteChart"></div>
+          <div class="monte-stats">
+            <div><span>P10</span><strong id="mcP10">—</strong></div>
+            <div><span>Median</span><strong id="mcP50">—</strong></div>
+            <div><span>P90</span><strong id="mcP90">—</strong></div>
+            <div class="highlight"><span>Above price</span><strong id="mcProb">—</strong></div>
+          </div>
+        </article>
+
+        <article class="panel quality-panel" id="qualitySection" aria-labelledby="qualityHeading">
+          <div class="panel-head-row">
+            <div>
+              <p class="mono-label">BUSINESS QUALITY</p>
+              <h2 id="qualityHeading">A wonderful business at the wrong price is still a bad investment.</h2>
+            </div>
+          </div>
+          <div class="quality-top">
+            <div class="score-ring" id="scoreRing">
+              <div class="score-ring-inner"><strong id="qualityScore">—</strong><span>/100</span></div>
+            </div>
+            <div class="quality-summary">
+              <span class="grade-pill" id="qualityGrade">—</span>
+              <p id="qualitySummary">—</p>
+              <div class="strength-chips" id="qualityStrengths"></div>
+            </div>
+          </div>
+          <div class="quality-metrics" id="qualityMetrics"></div>
+          <div class="flag-block">
+            <p class="mono-label">RED FLAGS</p>
+            <ul class="flag-list" id="qualityFlags"></ul>
+          </div>
+        </article>
+      </section>
+
+      <section class="section-block evidence-section" aria-labelledby="evidenceHeading">
+        <div class="section-head">
+          <div>
+            <p class="mono-label">THE EVIDENCE</p>
+            <h2 id="evidenceHeading">Show your work.</h2>
+          </div>
+          <p class="section-sub">The blend, the street, and the assumptions that would change the answer.</p>
+        </div>
+        <div class="evidence-grid">
+          <article class="panel weights-panel">
+            <div class="panel-head-row">
+              <h3>How the blend is built</h3>
+              <span class="weight-total" id="weightTotal">—</span>
+            </div>
+            <p class="panel-intro">Weights reflect how much each lens can be trusted for this business. A bank and a software company are not valued the same way.</p>
+            <div class="weights-table" id="weightsTable"></div>
+            <p class="panel-note" id="weightsNote">—</p>
+            <div class="confidence-detail">
+              <div class="confidence-detail-head">
+                <div>
+                  <p class="mono-label">CONFIDENCE IN THE BLEND</p>
+                  <p class="confidence-detail-copy" id="confidenceCopy">—</p>
+                </div>
+                <strong id="confidenceDetailScore">—</strong>
+              </div>
+              <div class="confidence-meter"><span id="confidenceMeterFill"></span></div>
+              <ul class="confidence-reasons" id="confidenceReasons"></ul>
+            </div>
+          </article>
+
+          <article class="panel analyst-panel">
+            <div class="panel-head-row">
+              <h3>Street view</h3>
+              <span class="mono-label" id="analystCount">—</span>
+            </div>
+            <div class="analyst-target" id="analystTarget">—</div>
+            <div class="analyst-range">
+              <div class="analyst-track" id="analystTrack"><span class="analyst-fill"></span><span class="analyst-marker" id="analystMarker"></span></div>
+              <div class="analyst-labels" id="analystLabels"><span id="analystLow">—</span><span id="analystMean">—</span><span id="analystHigh">—</span></div>
+            </div>
+            <div class="analyst-rating" id="analystRating">—</div>
+            <p class="panel-note">Sell-side targets are 12-month price expectations, not intrinsic value. Shown as context, never included in the blend.</p>
+            <div class="watch-callout" id="watchCallout">
+              <p class="mono-label">VALUATION TRIGGER</p>
+              <p id="watchTrigger">—</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel thesis-panel">
+        <div>
+          <p class="mono-label">WHAT WOULD CHANGE OUR MIND</p>
+          <h2>The three variables that matter most.</h2>
+        </div>
+        <div class="thesis-grid" id="thesisGrid"></div>
+      </section>
+
+      <section class="disclaimer">
+        <p><strong>Not investment advice.</strong> Intrinsic is an educational research tool. Data comes from public Yahoo Finance endpoints, may be delayed or incomplete, and valuation models are simplified. Always read the filings and do your own work.</p>
+        <p id="dataSourceLine">—</p>
+        <p id="periodLine">—</p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        INTRINSIC<span class="brand-dot">.</span>
+      </div>
+      <div>
+        <p>Price is an opinion. Value is a calculation. Fundamentals are taken directly from company filings on SEC EDGAR, not from aggregated estimates.</p>
+        <button class="text-btn" type="button" id="methodologyButton"><svg class="icon"><use href="#i-info"></use></svg> Methodology &amp; data</button>
+      </div>
+    </div>
+  </footer>
+
+  <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
+  <aside class="watch-drawer" id="watchlistDrawer" aria-labelledby="watchHeading" aria-hidden="true">
+    <div class="drawer-head">
+      <div>
+        <p class="mono-label">YOUR SHORTLIST</p>
+        <h2 id="watchHeading">Watchlist</h2>
+      </div>
+      <button class="icon-btn" id="closeWatchlist" type="button" aria-label="Close watchlist"><svg class="icon"><use href="#i-close"></use></svg></button>
+    </div>
+    <p class="drawer-intro">Saved locally in this browser. Prices refresh when you open a name.</p>
+    <div class="watch-list" id="watchList"></div>
+    <div class="drawer-empty" id="watchEmpty">
+      <div class="empty-mark"><svg class="icon"><use href="#i-bookmark"></use></svg></div>
+      <p>Your watchlist is empty.</p>
+      <span>Search a company and press <strong>Save</strong> to keep it here.</span>
+    </div>
+    <button class="text-btn clear-watch" id="clearWatchlist" type="button">Clear watchlist</button>
+  </aside>
+
+  <dialog class="method-dialog" id="methodDialog">
+    <div class="dialog-head">
+      <div>
+        <p class="mono-label">METHODOLOGY & DATA</p>
+        <h2>How Intrinsic works.</h2>
+      </div>
+      <button class="icon-btn" id="closeMethod" type="button" aria-label="Close methodology"><svg class="icon"><use href="#i-close"></use></svg></button>
+    </div>
+    <div class="dialog-body">
+      <section>
+        <h3>The data</h3>
+        <p>Live public-market data is pulled from Yahoo Finance: quote and chart data, annual and trailing fundamentals, analyst targets, company profile and a live sector peer set. The server caches each ticker for 15 minutes and peer sets for one hour. If live data is unavailable, a saved or bundled snapshot is clearly labelled.</p>
+        <ul>
+          <li><strong>Price:</strong> delayed by at least 15 minutes; some exchanges longer.</li>
+          <li><strong>Fundamentals:</strong> trailing-twelve-month and up to five reported fiscal years.</li>
+          <li><strong>FCF:</strong> operating cash flow minus capital expenditure, then optionally less stock-based compensation.</li>
+          <li><strong>FX:</strong> financial-statement currencies are converted into the quote currency when Yahoo provides a rate.</li>
+        </ul>
+      </section>
+      <section>
+        <h3>The seven lenses</h3>
+        <dl>
+          <dt>Discounted cash flow</dt><dd>A 5–15 year free-cash-flow projection with growth fading to a terminal rate, discounted at WACC, less net debt.</dd>
+          <dt>Earnings power value</dt><dd>Normalized after-tax operating earnings capitalised at WACC, with no growth. A conservative floor.</dd>
+          <dt>Peer P/E</dt><dd>Current EPS × the median P/E of up to six live sector peers. Falls back to a static sector benchmark when a peer set is unavailable.</dd>
+          <dt>EV / EBITDA or P/B</dt><dd>Operating companies use EBITDA × the peer median EV/EBITDA, less net debt. Banks and insurers use book value per share × the peer median P/B instead.</dd>
+          <dt>Revised Graham formula</dt><dd>EPS × (8.5 + 2g) × 4.4 / AAA yield. A 1970s heuristic, capped and treated as low confidence.</dd>
+          <dt>Graham number</dt><dd>√(22.5 × EPS × book value per share). Mostly a balance-sheet cross-check.</dd>
+          <dt>Dividend discount</dt><dd>A two-stage dividend model. Only weighted when the payout ratio is meaningful.</dd>
+        </dl>
+      </section>
+      <section>
+        <h3>The blend and confidence score</h3>
+        <p>Models are weighted by relevance and reliability, then normalized. Banks and insurers shift weight toward earnings and book value and away from DCF and EV/EBITDA; they receive a peer P/B lens instead. If free cash flow is negative, DCF drops out. If a dividend is immaterial, DDM is shown but not weighted. The headline is a weighted average; the bear/bull range is the weighted average of each model's own range.</p>
+        <p>The confidence score combines model coverage, data completeness, dispersion between the lenses, DCF terminal-value dependence, live peer support and the quality red-flag count. It describes confidence in the valuation estimate, not confidence in future returns.</p>
+      </section>
+      <section>
+        <h3>Important limits</h3>
+        <p>This tool does not know management quality, competitive threats, litigation, accounting quality or macro shocks. DCF terminal values are sensitive to small input changes. Peer sets are sector-level, not a hand-curated comparable-company analysis; when live peers are unavailable, static sector benchmarks are used. Treat every output as a starting point for research, not a verdict.</p>
+      </section>
+    </div>
+    <div class="dialog-foot">
+      <p>Data provider: Yahoo Finance · Not affiliated with Yahoo.</p>
+      <button class="btn primary" id="closeMethodBottom" type="button">Close</button>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="/static/js/app.js"></script>
+</body>
+</html>

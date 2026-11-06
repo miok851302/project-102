@@ -1,0 +1,60 @@
+# Intrinsic — complete package
+
+This zip contains the full app, including the sample report and screenshots.
+
+## Start it (Windows)
+
+Double-click **`start.bat`** — it starts the server and opens your browser.
+
+Or in PowerShell:
+
+```powershell
+cd intrinsic
+.\start.ps1
+```
+
+Then open <http://127.0.0.1:8765>.
+
+## Start it (macOS / Linux, or any OS with Python 3.10+)
+
+```bash
+cd intrinsic
+python3 server.py --open
+```
+
+No installs, no API keys, no build step — the server uses only Python's standard library.
+
+## What's inside
+
+```
+intrinsic/
+├── start.bat / start.ps1     ← one-click launchers
+├── server.py                 ← the local server + market data layer
+├── static/                   ← the website (HTML, CSS, JavaScript)
+│   ├── index.html
+│   ├── css/styles.css
+│   └── js/app.js, js/valuation.js
+├── data/fallback/            ← offline snapshots for 10 companies
+├── tests/valuation.test.mjs  ← 11 automated tests
+├── screens/                  ← screenshots + sample PDF report
+│   ├── desktop.png
+│   ├── light.png
+│   ├── mobile.png
+│   └── intrinsic-report.pdf
+├── README.md                 ← full documentation
+├── DEPLOY.md                 ← how to put it online
+├── Dockerfile                ← optional container build
+└── .dockerignore / .gitignore
+```
+
+## A note on the server
+
+The app runs **locally on your machine** while `start.bat` (or the Python command) is open.
+If the page says "page load failed", the server has stopped — start it again.
+
+Closing the black console window stops the server.
+
+## Reporting a problem
+
+If something doesn't load, check the console window for errors and note which ticker
+you were viewing. The footer of each analysis shows exactly which financial periods it used.
